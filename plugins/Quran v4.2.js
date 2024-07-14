@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const commands = {
-  command: ["qrntst", "قران", "قرآن"],
+  command: ["quran", "coran", "القرآن الكريم", "القران الكريم", "قران", "قرآن"],
 };
 
 async function downloadWholeSurah(sock, sender, quranState, userState) {
@@ -70,7 +70,6 @@ async function downloadWholeSurah(sock, sender, quranState, userState) {
 
     const surahName = surahData[quranState.surah].name;
     console.log(`Surah name: ${surahName}`);
-    console.log(chalk.bgRed.bold.white(reciter.image));
 
     const reciterImageUrl = reciter
       ? reciter.image
@@ -190,8 +189,16 @@ export async function handleMessage(sock, msg, userState) {
     if (
       commandWords.some((cmd) => messageContent === `${settings.prefix}${cmd}`)
     ) {
-      const title = "السلام عليكم ورحمة الله";
-      const text = `\n*يمكنك تحميل آية محددة من القرآن الكريم بصوت أشهر القراء.*\n\n*رجاء قم باختيار القارئ من القائمة.*`;
+      const title = "السلام عليكم 👋";
+      const text = `*هذا البوت يمكنك من تحميل القرآن الكريم بصوت أشهر القراء بحيث يمكنك :*
+✅ *تحميل سورة كاملة*
+✅ *تحميل مجموعة آيات محددة*
+✅ *تحميل آية واحدة*
+
+*لا تنسونا من دعائكم لوالدي بالرحمة والمغفرة لعلكم أقرب إلى الله منزلة* ❤️
+
+Buy me a coffee
+https://www.buymeacoffee.com/Y0U5SEF`;
       const buttonText = "اخـتيار الــقارئ";
 
       const listSections = [
