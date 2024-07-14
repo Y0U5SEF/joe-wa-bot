@@ -1,5 +1,4 @@
 import { generateWAMessageFromContent } from "@whiskeysockets/baileys";
-import chalk from "chalk";
 import settings from "../settings.js";
 import { reciterList, surahList, surahData } from "../lib/quranData.js";
 import axios from "axios";
@@ -43,7 +42,7 @@ async function downloadWholeSurah(sock, sender, quranState, userState) {
   try {
     console.log(`Sending initial message to user...`);
     await sock.sendMessage(sender, {
-      text: "جاري تحميل السورة... يرجى الانتظار.",
+      text: `⏳ ${settings.Wait}`,
     });
 
     console.log(`Starting download...`);
@@ -176,11 +175,11 @@ export async function handleMessage(sock, msg, userState) {
   }
 
   try {
-    console.log(
-      "Current user state:",
-      JSON.stringify(userState[sender], null, 2)
-    );
-    console.log("Received message:", JSON.stringify(msg, null, 2));
+    // console.log(
+    //   "Current user state:",
+    //   JSON.stringify(userState[sender], null, 2)
+    // );
+    // console.log("Received message:", JSON.stringify(msg, null, 2));
 
     const messageContent = msg.message?.conversation;
 
@@ -238,8 +237,8 @@ https://www.buymeacoffee.com/Y0U5SEF`;
           : "Unknown Reciter";
 
         const title = "";
-        const text = `لقد تم تحديد القارئ ${selectedReciterName}\n\nالرجاء اختيار سورة من القائمة`;
-        const buttonText = "اختيار السورة";
+        const text = `لقد تم تحديد القارئ *${selectedReciterName}*`;
+        const buttonText = "اختيار سورة";
 
         const listSections = [
           {
@@ -278,7 +277,7 @@ https://www.buymeacoffee.com/Y0U5SEF`;
 
         const selectedSurahName = surahData[selectedSurahId].name;
 
-        const text = `لقد تم اختيار سورة ${selectedSurahName}\nالرجاء اختيار طريقة التحميل:`;
+        const text = `لقد تم اختيار سورة *${selectedSurahName}*`;
 
         userState[sender].quran.surah = selectedSurahId;
         userState[sender].quran.step = "selecting_download_option";
@@ -300,7 +299,7 @@ https://www.buymeacoffee.com/Y0U5SEF`;
 
         const interactiveMessage = {
           body: { text },
-          footer: { text: "اختر خيارًا" },
+          footer: { text: "" },
           header: {
             hasMediaAttachment: false,
             imageMessage: null,

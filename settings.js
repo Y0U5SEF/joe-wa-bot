@@ -7,7 +7,7 @@ const settings = {
   owner: ["212665167445@s.whatsapp.net"],
   prefix: "-",
   sessionPath: "./session",
-  Wait: "Tsenna chwiya",
+  Wait: `*يـرجـى الانـتـظـار*`,
   RTL: "‏",
   LTR: "‎",
 };
