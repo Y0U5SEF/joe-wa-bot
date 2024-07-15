@@ -83,24 +83,7 @@ async function updateUser(jid, userData) {
   }
 }
 
-// async function loadPlugin(file) {
-//   if (file.endsWith(".js")) {
-//     try {
-//       // Unload existing plugin if loaded
-//       if (plugins[file]) {
-//         delete require.cache[require.resolve(`./plugins/${file}`)];
-//         delete plugins[file];
-//         console.log(chalk.yellow(`Unloaded ${file}`));
-//       }
 
-//       const plugin = await import(`./plugins/${file}?update=${Date.now()}`);
-//       plugins[file] = plugin;
-//       console.log(chalk.green(`Loaded ${file}`));
-//     } catch (error) {
-//       console.error(chalk.red(`Error loading ${file}: ${error.message}`));
-//     }
-//   }
-// }
 async function loadPlugin(file) {
   if (file.endsWith(".js")) {
     try {
@@ -163,17 +146,115 @@ function formatUptime(ms) {
   return `${days}d ${hours % 24}h ${minutes % 60}m ${seconds % 60}s`;
 }
 
+// async function handleMessages(sock, m) {
+//   const msg = m.messages[0];
+//   if (!msg.key.fromMe && m.type === "notify") {
+//     const sender = msg.key.remoteJid;
+//     if (!userState[sender]) {
+//       userState[sender] = {};
+//     }
+
+//     const pushName = msg.pushName || "Unknown";
+//     const messageTime = new Date(msg.messageTimestamp * 1000).toLocaleString();
+//     const messageBody = msg.message?.conversation || "(No text)";
+
+//     const isCommand = messageBody.startsWith(settings.prefix);
+
+//     if (isCommand) {
+//       const command = messageBody
+//         .slice(settings.prefix.length)
+//         .trim()
+//         .split(" ")[0];
+
+//       console.log("\n" + chalk.yellow("╭───────────────────────────────"));
+//       console.log(chalk.yellow("│ ") + chalk.green("🔧 Command Detected!"));
+//       console.log(chalk.yellow("├───────────────────────────────"));
+//       console.log(
+//         chalk.yellow("│ ") + chalk.blue("👤 Sender: ") + chalk.white(pushName)
+//       );
+//       console.log(
+//         chalk.yellow("│ ") +
+//           chalk.blue("📞 Number: ") +
+//           chalk.white(sender.split("@")[0])
+//       );
+//       console.log(
+//         chalk.yellow("│ ") + chalk.blue("🕒 Time: ") + chalk.white(messageTime)
+//       );
+//       console.log(
+//         chalk.yellow("│ ") + chalk.blue("💬 Command: ") + chalk.white(command)
+//       );
+//       console.log(chalk.yellow("╰───────────────────────────────"));
+//     } else {
+//       console.log("\n" + chalk.yellow("╭───────────────────────────────"));
+//       console.log(chalk.yellow("│ ") + chalk.green("📩 New Message Received!"));
+//       console.log(chalk.yellow("├───────────────────────────────"));
+//       console.log(
+//         chalk.yellow("│ ") + chalk.blue("👤 Sender: ") + chalk.white(pushName)
+//       );
+//       console.log(
+//         chalk.yellow("│ ") +
+//           chalk.blue("📞 Number: ") +
+//           chalk.white(sender.split("@")[0])
+//       );
+//       console.log(
+//         chalk.yellow("│ ") + chalk.blue("🕒 Time: ") + chalk.white(messageTime)
+//       );
+//       console.log(
+//         chalk.yellow("│ ") +
+//           chalk.blue("💬 Message: ") +
+//           chalk.white(messageBody)
+//       );
+//       console.log(chalk.yellow("╰───────────────────────────────"));
+//     }
+
+//     try {
+//       let userData = {
+//         id: sender,
+//         name: pushName,
+//         isGroup: sender.endsWith("@g.us"),
+//       };
+
+//       await updateUser(sender, userData);
+
+//       if (isCommand && messageBody === `${settings.prefix}alive`) {
+//         const uptime = Date.now() - startTime;
+//         const formattedUptime = formatUptime(uptime);
+//         const monospace = "```";
+//         await sock.sendMessage(sender, {
+//           text: `*Bot has been up for:*⏱️ \n${monospace}${formattedUptime}${monospace}`,
+//         });
+//         return;
+//       }
+
+//       for (const file in plugins) {
+//         try {
+//           await plugins[file].handleMessage(sock, msg, userState);
+//         } catch (error) {
+//           logger.error(`Error in plugin ${file}: ${error.message}`);
+//         }
+//       }
+//     } catch (error) {
+//       logger.error(`Error handling message: ${error.message}`);
+//     }
+//   }
+// }
 async function handleMessages(sock, m) {
   const msg = m.messages[0];
   if (!msg.key.fromMe && m.type === "notify") {
     const sender = msg.key.remoteJid;
-    if (!userState[sender]) {
-      userState[sender] = {};
-    }
-
     const pushName = msg.pushName || "Unknown";
     const messageTime = new Date(msg.messageTimestamp * 1000).toLocaleString();
     const messageBody = msg.message?.conversation || "(No text)";
+
+    // Initialize user state and database entry for new users
+    if (!userState[sender]) {
+      userState[sender] = {};
+      await updateUser(sender, {
+        id: sender,
+        name: pushName,
+        isGroup: sender.endsWith("@g.us"),
+      });
+    }
 
     const isCommand = messageBody.startsWith(settings.prefix);
 
@@ -222,17 +303,8 @@ async function handleMessages(sock, m) {
           chalk.white(messageBody)
       );
       console.log(chalk.yellow("╰───────────────────────────────"));
-    }
-
+    }  
     try {
-      let userData = {
-        id: sender,
-        name: pushName,
-        isGroup: sender.endsWith("@g.us"),
-      };
-
-      await updateUser(sender, userData);
-
       if (isCommand && messageBody === `${settings.prefix}alive`) {
         const uptime = Date.now() - startTime;
         const formattedUptime = formatUptime(uptime);
@@ -243,6 +315,7 @@ async function handleMessages(sock, m) {
         return;
       }
 
+      // Process plugin commands
       for (const file in plugins) {
         try {
           await plugins[file].handleMessage(sock, msg, userState);
