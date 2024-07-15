@@ -305,7 +305,7 @@ async function handleMessages(sock, m) {
       console.log(chalk.yellow("╰───────────────────────────────"));
     }  
     try {
-      if (isCommand && messageBody === `${settings.prefix}alive`) {
+      if (isCommand && messageBody.toLowerCase() === `${settings.prefix}alive`) {
         const uptime = Date.now() - startTime;
         const formattedUptime = formatUptime(uptime);
         const monospace = "```";
